@@ -1,0 +1,31 @@
+.container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.time {
+  font-family: var(--font-inter, sans-serif);
+  font-size: 0.75rem;
+  color: #a0a0b0;
+  min-width: 40px;
+  text-align: center;
+}
+
+.track {
+  flex: 1;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 999px;
+  overflow: hidden;
+  box-shadow: inset 2px 2px 4px rgba(0,0,0,0.4), inset -2px -2px 4px rgba(255,255,255,0.02);
+  position: relative;
+}
+
+.fill {
+  height: 100%;
+  background: linear-gradient(90deg, #d4a210, #e2b714);
+  border-radius: 999px;
+  box-shadow: 0 0 8px rgba(226, 183, 20, 0.4);
+}

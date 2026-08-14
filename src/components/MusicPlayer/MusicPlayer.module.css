@@ -1,0 +1,181 @@
+.playerBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 40;
+  background: rgba(15, 15, 26, 0.75);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 16px 24px;
+}
+
+.content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.trackInfoWrapper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 250px;
+  flex-shrink: 0;
+}
+
+.vinyl {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  border: 2px solid #000;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+  background: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vinyl.spinning {
+  animation: spin 3s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.8;
+}
+
+.hole {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #0f0f1a;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.1);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.trackInfo {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.title {
+  font-family: var(--font-outfit, sans-serif);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.artist {
+  font-family: var(--font-inter, sans-serif);
+  font-size: 0.8rem;
+  color: #a0a0b0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+.controlsWrapper {
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.glassBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e8e8e8;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glassBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: scale(1.05);
+}
+
+.playBtn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e2b714, #d4a210);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1a1a2e;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(226, 183, 20, 0.4);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.playBtn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(226, 183, 20, 0.6);
+}
+
+.progressWrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .playerBar {
+    padding: 12px 16px;
+  }
+  
+  .content {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  
+  .progressWrapper {
+    order: -1;
+    width: 100%;
+    flex: 1 1 100%;
+  }
+  
+  .trackInfoWrapper {
+    width: auto;
+    flex: 1;
+  }
+  
+  .controlsWrapper {
+    flex-shrink: 0;
+  }
+}

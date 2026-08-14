@@ -1,0 +1,79 @@
+/* ============================================
+   HeartButton — Glassmorphism Styling
+   ============================================ */
+
+.container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: var(--font-body, 'Inter', sans-serif);
+}
+
+.container:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.iconWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heart {
+  width: 24px;
+  height: 24px;
+  fill: transparent;
+  stroke: rgba(255, 255, 255, 0.6);
+  stroke-width: 2;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.heart.liked {
+  fill: #ff4757;
+  stroke: #ff4757;
+  filter: drop-shadow(0 0 10px rgba(255, 71, 87, 0.5));
+}
+
+.particles {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  background: #ff4757;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 
+    0 -15px 0 -1px #ff4757, 
+    12px -9px 0 -1px #ff4757, 
+    12px 9px 0 -1px #ff4757, 
+    0 15px 0 -1px #ff4757, 
+    -12px 9px 0 -1px #ff4757, 
+    -12px -9px 0 -1px #ff4757;
+  pointer-events: none;
+}
+
+.countWrapper {
+  overflow: hidden;
+  height: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.count {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+}

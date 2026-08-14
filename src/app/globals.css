@@ -1,49 +1,304 @@
+/* ============================================
+   🌙 MIDNIGHT RADIO — Design System
+   Glassmorphism Dark Theme
+   ============================================ */
+
+/* --- Google Fonts Import --- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+/* --- CSS Custom Properties --- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Base Colors */
+  --bg-primary: #0a0a14;
+  --bg-secondary: #0f0f1e;
+  --bg-surface: #131325;
+  --bg-elevated: #1a1a30;
+  
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-bg-hover: rgba(255, 255, 255, 0.08);
+  --glass-bg-strong: rgba(255, 255, 255, 0.06);
+  --glass-bg-dark: rgba(10, 10, 20, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-hover: rgba(255, 255, 255, 0.15);
+  --glass-blur: blur(20px);
+  --glass-blur-heavy: blur(30px);
+  
+  /* Accent Colors */
+  --accent-primary: #e2b714;
+  --accent-primary-rgb: 226, 183, 20;
+  --accent-primary-glow: rgba(226, 183, 20, 0.25);
+  --accent-primary-dim: rgba(226, 183, 20, 0.6);
+  --accent-gradient: linear-gradient(135deg, #e2b714, #f0d060, #d4a210);
+  --accent-secondary: #ff6b6b;
+  --accent-heart: #ff4757;
+  --accent-heart-glow: rgba(255, 71, 87, 0.3);
+  
+  /* Text Colors */
+  --text-primary: #ebebf0;
+  --text-secondary: #8888a0;
+  --text-muted: #55556a;
+  --text-accent: var(--accent-primary);
+  
+  /* Layout */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-pill: 999px;
+  
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+  
+  /* Transitions */
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-dramatic: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: 150ms var(--ease-smooth);
+  --transition-normal: 300ms var(--ease-smooth);
+  --transition-slow: 500ms var(--ease-smooth);
+  --transition-cinematic: 800ms var(--ease-dramatic);
+  
+  /* Typography */
+  --font-heading: 'Outfit', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  
+  /* Z-Index Scale */
+  --z-background: -1;
+  --z-base: 0;
+  --z-stars: 1;
+  --z-content: 10;
+  --z-overlay: 20;
+  --z-modal: 30;
+  --z-player: 40;
+  --z-toast: 50;
+  
+  /* Player Height */
+  --player-height: 88px;
+  --player-height-mobile: 130px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* --- Reset & Base --- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 html {
-  height: 100%;
-}
-
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
 }
 
-* {
-  box-sizing: border-box;
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+/* --- Selection --- */
+::selection {
+  background: var(--accent-primary);
+  color: var(--bg-primary);
+}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* --- Focus Styles --- */
+:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* --- Typography --- */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; }
+h2 { font-size: clamp(1.5rem, 3vw, 2.25rem); }
+h3 { font-size: clamp(1.25rem, 2.5vw, 1.75rem); }
+
+/* --- Utility Classes --- */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
   padding: 0;
-  margin: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+/* --- Glass Component Classes --- */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--glass-border);
+  transition: all var(--transition-normal);
 }
 
-@media (prefers-color-scheme: dark) {
+.glass-card:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+}
+
+.glass-button {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: var(--font-body);
+}
+
+.glass-button:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+  transform: translateY(-1px);
+}
+
+.glass-button:active {
+  transform: translateY(0);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.glass-button-accent {
+  background: var(--accent-gradient);
+  color: var(--bg-primary);
+  font-weight: 600;
+  border: none;
+  box-shadow: 0 4px 20px var(--accent-primary-glow), 0 0 40px rgba(226, 183, 20, 0.1);
+}
+
+.glass-button-accent:hover {
+  box-shadow: 0 6px 30px var(--accent-primary-glow), 0 0 60px rgba(226, 183, 20, 0.15);
+  transform: translateY(-2px);
+}
+
+/* --- Gradient Text --- */
+.gradient-text {
+  background: linear-gradient(135deg, #e2b714 0%, #f0d060 50%, #e2b714 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s ease-in-out infinite;
+}
+
+/* --- Glow Effects --- */
+.glow-accent {
+  box-shadow: 0 0 30px var(--accent-primary-glow);
+}
+
+.glow-heart {
+  box-shadow: 0 0 20px var(--accent-heart-glow);
+}
+
+/* --- Keyframe Animations --- */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  50% { background-position: 0% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes float-orb-1 {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(5vw, -3vh); }
+  50% { transform: translate(-3vw, 5vh); }
+  75% { transform: translate(4vw, 2vh); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes float-orb-2 {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-4vw, 4vh); }
+  50% { transform: translate(6vw, -2vh); }
+  75% { transform: translate(-2vw, -4vh); }
+  100% { transform: translate(0, 0); }
+}
+
+/* --- Main Content Area --- */
+.main-content {
+  min-height: 100vh;
+  padding-bottom: calc(var(--player-height) + var(--space-xl));
+  position: relative;
+  z-index: var(--z-content);
+}
+
+/* --- Responsive Breakpoints --- */
+@media (max-width: 768px) {
+  .main-content {
+    padding-bottom: calc(var(--player-height-mobile) + var(--space-lg));
+  }
+}
+
+@media (max-width: 480px) {
   html {
-    color-scheme: dark;
+    font-size: 14px;
   }
 }

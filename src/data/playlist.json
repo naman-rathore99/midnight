@@ -18,14 +18,31 @@
     "title": "Kal Ho Naa Ho",
     "artist": "Sonu Nigam",
     "era": "2000s",
-    "vibe": "emotional"
+    "vibe": "emotional",
+    "lyrics": [
+      { "time": 10.0, "text": "Har ghadi badal rahi hai roop zindagi" },
+      { "time": 16.0, "text": "Chaav hai kabhi, kabhi hai dhoop zindagi" },
+      { "time": 23.0, "text": "Har pal yahan..." },
+      { "time": 26.0, "text": "Jee bhar jiyo" },
+      { "time": 30.0, "text": "Jo hai sama..." },
+      { "time": 33.0, "text": "Kal ho naa ho" }
+    ]
   },
   {
     "id": "DJztXj2GPfk",
     "title": "Tum Hi Ho",
     "artist": "Arijit Singh",
     "era": "2010s",
-    "vibe": "romantic"
+    "vibe": "romantic",
+    "lyrics": [
+      { "time": 14.0, "text": "Hum tere bin ab reh nahi sakte" },
+      { "time": 21.0, "text": "Tere bina kya wajood mera" },
+      { "time": 28.0, "text": "Tujhse juda gar ho jaayenge" },
+      { "time": 34.0, "text": "Toh khud se hi ho jaayenge judaa" },
+      { "time": 41.0, "text": "Kyunki tum hi ho..." },
+      { "time": 45.0, "text": "Ab tum hi ho" },
+      { "time": 48.0, "text": "Zindagi ab tum hi ho" }
+    ]
   },
   {
     "id": "atKUGCmyPI0",
