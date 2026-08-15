@@ -1,14 +1,25 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import styles from './SongPicker.module.css';
 
-export default function SongPicker({ playlist = [], onPickSong, isOpen = true }) {
+export default function SongPicker({ 
+  mainPlaylist = [], 
+  customPlaylist = [], 
+  onPickSong, 
+  onAddCustom,
+  onRemoveCustom,
+  isOpen = true 
+}) {
+  const [activeTab, setActiveTab] = useState('main'); // 'main' or 'custom'
+
+  const currentList = activeTab === 'main' ? mainPlaylist : customPlaylist;
+
   const handleShuffle = () => {
-    if (playlist.length === 0) return;
-    const randomIndex = Math.floor(Math.random() * playlist.length);
-    onPickSong(randomIndex);
+    if (currentList.length === 0) return;
+    const randomIndex = Math.floor(Math.random() * currentList.length);
+    onPickSong(randomIndex, activeTab);
   };
 
   const containerVariants = {
@@ -39,45 +50,60 @@ export default function SongPicker({ playlist = [], onPickSong, isOpen = true })
           animate="visible"
           exit="exit"
         >
+          {/* Blurred Indian Background */}
+          <div className={styles.bgImage}></div>
+          <div className={styles.bgOverlay}></div>
+
           <div className={styles.scrollContainer}>
             <div className={styles.content}>
+              
               <motion.div className={styles.header} variants={itemVariants}>
-                <motion.div 
-                  className={styles.moon}
-                  animate={{ 
-                    textShadow: [
-                      "0 0 20px rgba(226,183,20,0.3)", 
-                      "0 0 60px rgba(226,183,20,0.6)", 
-                      "0 0 20px rgba(226,183,20,0.3)"
-                    ] 
-                  }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                >
-                  🌙
-                </motion.div>
                 <h1 className={styles.title}>Midnight Radio</h1>
-                <p className={styles.subtitle}>Pick your first vibe...</p>
+                <p className={styles.subtitle}>Pick your vibe...</p>
+                
+                <div className={styles.tabs}>
+                  <button 
+                    className={`${styles.tabBtn} ${activeTab === 'main' ? styles.activeTab : ''}`}
+                    onClick={() => setActiveTab('main')}
+                  >
+                    Main Radio
+                  </button>
+                  <button 
+                    className={`${styles.tabBtn} ${activeTab === 'custom' ? styles.activeTab : ''}`}
+                    onClick={() => setActiveTab('custom')}
+                  >
+                    My Playlist
+                  </button>
+                </div>
+
                 <motion.button 
                   className={styles.shuffleBtn}
                   onClick={handleShuffle}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  disabled={currentList.length === 0}
                 >
                   ✨ Shuffle & Play
                 </motion.button>
               </motion.div>
 
+              {currentList.length === 0 && activeTab === 'custom' && (
+                <motion.div className={styles.emptyState} variants={itemVariants}>
+                  <p>Your playlist is empty.</p>
+                  <p>Add songs from the Main Radio to build your vibe!</p>
+                </motion.div>
+              )}
+
               <motion.div className={styles.grid}>
-                {playlist.map((song, index) => (
+                {currentList.map((song, index) => (
                   <motion.div
                     key={song.id || index}
                     className={styles.card}
                     variants={itemVariants}
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
-                    onClick={() => onPickSong(index)}
                   >
-                    <div className={styles.thumbnailWrapper}>
+                    <div className={styles.thumbnailWrapper} onClick={() => onPickSong(index, activeTab)}>
                       <img 
                         src={`https://img.youtube.com/vi/${song.id}/mqdefault.jpg`} 
                         alt={song.title}
@@ -91,10 +117,28 @@ export default function SongPicker({ playlist = [], onPickSong, isOpen = true })
                       </div>
                     </div>
                     <div className={styles.cardBody}>
-                      <h3 className={styles.songTitle}>{song.title}</h3>
+                      <h3 className={styles.songTitle} onClick={() => onPickSong(index, activeTab)}>{song.title}</h3>
                       <p className={styles.artistName}>{song.artist}</p>
+                      
                       <div className={styles.cardFooter}>
-                        {song.era && <span className={styles.eraPill}>{song.era}</span>}
+                        {activeTab === 'main' ? (
+                          <button 
+                            className={styles.addBtn} 
+                            onClick={(e) => { e.stopPropagation(); onAddCustom(song); }}
+                            title="Add to My Playlist"
+                          >
+                            + Add
+                          </button>
+                        ) : (
+                          <button 
+                            className={styles.removeBtn} 
+                            onClick={(e) => { e.stopPropagation(); onRemoveCustom(song.id); }}
+                            title="Remove from My Playlist"
+                          >
+                            - Remove
+                          </button>
+                        )}
+                        
                         {song.vibe && (
                           <div className={styles.vibeWrapper}>
                             <span className={styles.vibeDot} />

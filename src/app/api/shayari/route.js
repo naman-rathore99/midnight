@@ -107,6 +107,35 @@ export async function POST(request) {
 
     if (error) throw error;
 
+    // Send Telegram Notification
+    const telegramBotToken = process.env.TELEGRAM_BOT_TOKEN;
+    const telegramAdminId = process.env.TELEGRAM_ADMIN_CHAT_ID;
+
+    if (telegramBotToken && telegramAdminId) {
+      try {
+        const url = `https://api.telegram.org/bot${telegramBotToken}/sendMessage`;
+        await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: telegramAdminId,
+            text: `✍️ *New Shayari Submitted!*\n\n"${data.text}"\n\n*Author:* ${data.author}`,
+            parse_mode: 'Markdown',
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  { text: "✅ Accept", callback_data: `acceptShayari_${data.id}` },
+                  { text: "❌ Reject", callback_data: `rejectShayari_${data.id}` }
+                ]
+              ]
+            }
+          })
+        });
+      } catch (err) {
+        console.error("Telegram admin bot failed:", err);
+      }
+    }
+
     return NextResponse.json({ data, message: "Shayari submitted!" });
   } catch (err) {
     console.error("Error submitting shayari:", err);

@@ -2,7 +2,10 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import playlistData from '@/data/playlist.json';
 
 export default function useYouTubePlayer() {
-  const [playlist] = useState(playlistData);
+  const [mainPlaylist] = useState(playlistData);
+  const [customPlaylist, setCustomPlaylist] = useState([]);
+  const [activePlaylistType, setActivePlaylistType] = useState('main'); // 'main' or 'custom'
+  
   const [currentTrack, setCurrentTrack] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -14,41 +17,83 @@ export default function useYouTubePlayer() {
   const historyRef = useRef([]);
   const playerRef = useRef(null);
 
+  // Load custom playlist from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('midnight-custom-playlist');
+      if (saved) {
+        setCustomPlaylist(JSON.parse(saved));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
+  const saveCustomPlaylist = (newPlaylist) => {
+    setCustomPlaylist(newPlaylist);
+    try {
+      localStorage.setItem('midnight-custom-playlist', JSON.stringify(newPlaylist));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const addToCustomPlaylist = (track) => {
+    // avoid duplicates by ID
+    if (!customPlaylist.find(t => t.id === track.id)) {
+      saveCustomPlaylist([...customPlaylist, track]);
+    }
+  };
+
+  const removeFromCustomPlaylist = (id) => {
+    saveCustomPlaylist(customPlaylist.filter(t => t.id !== id));
+  };
+
   const setPlayerInstance = useCallback((instance) => {
     playerRef.current = instance;
   }, []);
 
-  const pickTrack = useCallback((index) => {
-    if (index >= 0 && index < playlist.length) {
-      // Push current track to history before switching
+  const getActivePlaylist = useCallback(() => {
+    return activePlaylistType === 'main' ? mainPlaylist : customPlaylist;
+  }, [activePlaylistType, mainPlaylist, customPlaylist]);
+
+  const pickTrack = useCallback((index, type = 'main') => {
+    const list = type === 'main' ? mainPlaylist : customPlaylist;
+    if (index >= 0 && index < list.length) {
       if (currentIndex >= 0) {
-        historyRef.current.push(currentIndex);
-        // Keep history manageable (last 50 tracks)
-        if (historyRef.current.length > 50) {
-          historyRef.current.shift();
-        }
+        historyRef.current.push({ index: currentIndex, type: activePlaylistType });
+        if (historyRef.current.length > 50) historyRef.current.shift();
       }
+      setActivePlaylistType(type);
       setCurrentIndex(index);
-      setCurrentTrack(playlist[index]);
+      setCurrentTrack(list[index]);
       setIsPlaying(true);
       setProgress(0);
       setCurrentTime(0);
       setDuration(0);
     }
-  }, [playlist, currentIndex]);
+  }, [mainPlaylist, customPlaylist, currentIndex, activePlaylistType]);
 
   const playRandom = useCallback(() => {
-    if (playlist.length === 0) return;
+    const list = getActivePlaylist();
+    if (list.length === 0) {
+      // Fallback to main if custom is empty
+      if (activePlaylistType === 'custom' && mainPlaylist.length > 0) {
+        pickTrack(0, 'main');
+      }
+      return;
+    }
+    
     let nextIndex;
-    if (playlist.length === 1) {
+    if (list.length === 1) {
       nextIndex = 0;
     } else {
       do {
-        nextIndex = Math.floor(Math.random() * playlist.length);
+        nextIndex = Math.floor(Math.random() * list.length);
       } while (nextIndex === currentIndex);
     }
-    pickTrack(nextIndex);
-  }, [playlist, currentIndex, pickTrack]);
+    pickTrack(nextIndex, activePlaylistType);
+  }, [getActivePlaylist, activePlaylistType, mainPlaylist, currentIndex, pickTrack]);
 
   const togglePlay = useCallback(() => {
     if (playerRef.current) {
@@ -66,21 +111,21 @@ export default function useYouTubePlayer() {
     playRandom();
   }, [playRandom]);
 
-  // NEW: Go to previous track
   const previous = useCallback(() => {
     if (historyRef.current.length > 0) {
-      const prevIndex = historyRef.current.pop();
-      // Don't push to history when going back
-      setCurrentIndex(prevIndex);
-      setCurrentTrack(playlist[prevIndex]);
+      const prev = historyRef.current.pop();
+      const list = prev.type === 'main' ? mainPlaylist : customPlaylist;
+      
+      setActivePlaylistType(prev.type);
+      setCurrentIndex(prev.index);
+      setCurrentTrack(list[prev.index]);
       setIsPlaying(true);
       setProgress(0);
       setCurrentTime(0);
       setDuration(0);
     }
-  }, [playlist]);
+  }, [mainPlaylist, customPlaylist]);
 
-  // Progress tracking interval
   useEffect(() => {
     let interval;
     if (isPlaying && playerRef.current) {
@@ -94,15 +139,10 @@ export default function useYouTubePlayer() {
             setDuration(dur);
             setProgress((time / dur) * 100);
           }
-        } catch (error) {
-          // Player might not be ready yet
-        }
+        } catch (error) {}
       }, 1000);
     }
-    
-    return () => {
-      if (interval) clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, [isPlaying]);
 
   return {
@@ -112,7 +152,14 @@ export default function useYouTubePlayer() {
     progress,
     duration,
     currentTime,
-    playlist,
+    
+    mainPlaylist,
+    customPlaylist,
+    activePlaylistType,
+    
+    addToCustomPlaylist,
+    removeFromCustomPlaylist,
+    
     pickTrack,
     playRandom,
     togglePlay,

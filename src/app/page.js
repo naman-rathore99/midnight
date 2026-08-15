@@ -4,6 +4,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import useYouTubePlayer from '@/hooks/useYouTubePlayer';
 import { useShayari } from '@/hooks/useShayari';
+import usePresence from '@/hooks/usePresence';
 
 import YouTubeEngine from '@/components/YouTubeEngine/YouTubeEngine';
 import CinematicBackground from '@/components/CinematicBackground/CinematicBackground';
@@ -13,6 +14,7 @@ import MusicPlayer from '@/components/MusicPlayer/MusicPlayer';
 import ShayariDisplay from '@/components/ShayariDisplay/ShayariDisplay';
 import ShayariInput from '@/components/ShayariInput/ShayariInput';
 import LyricsDisplay from '@/components/LyricsDisplay/LyricsDisplay';
+import SuggestSongInput from '@/components/SuggestSongInput/SuggestSongInput';
 
 import styles from './page.module.css';
 
@@ -33,7 +35,11 @@ export default function Home() {
     progress,
     duration,
     currentTime,
-    playlist,
+    mainPlaylist,
+    customPlaylist,
+    activePlaylistType,
+    addToCustomPlaylist,
+    removeFromCustomPlaylist,
     pickTrack,
     togglePlay,
     skip,
@@ -44,9 +50,13 @@ export default function Home() {
   // -- Shayari state --
   const { currentShayari, isVisible, loading, likeShayari, triggerRotation } = useShayari();
 
+  // -- Presence state --
+  usePresence();
+
   // -- UI state --
   const [showPicker, setShowPicker] = useState(true);
   const [showShayariInput, setShowShayariInput] = useState(false);
+  const [showSuggestInput, setShowSuggestInput] = useState(false);
   const [likedIds, setLikedIds] = useState(new Set());
   const [themeIndex, setThemeIndex] = useState(0);
 
@@ -62,10 +72,9 @@ export default function Home() {
     }
   }, []);
 
-  // Handle first song pick
   const handlePickSong = useCallback(
-    (index) => {
-      pickTrack(index);
+    (index, type) => {
+      pickTrack(index, type);
       setShowPicker(false);
       // Show shayari when first song plays
       setTimeout(() => triggerRotation(), 1500);
@@ -135,6 +144,21 @@ export default function Home() {
     }
   }, []);
 
+  // Handle song suggestion submit
+  const handleSuggestSubmit = useCallback(async ({ link, author }) => {
+    try {
+      await fetch('/api/suggest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ link, author }),
+      });
+      setShowSuggestInput(false);
+      // Optional: show a toast notification here
+    } catch (e) {
+      console.error('Failed to submit song suggestion:', e);
+    }
+  }, []);
+
   const cycleTheme = () => {
     setThemeIndex((prev) => (prev + 1) % THEMES.length);
   };
@@ -159,8 +183,11 @@ export default function Home() {
 
       {/* Song Picker Modal — shown on first visit */}
       <SongPicker
-        playlist={playlist}
+        mainPlaylist={mainPlaylist}
+        customPlaylist={customPlaylist}
         onPickSong={handlePickSong}
+        onAddCustom={addToCustomPlaylist}
+        onRemoveCustom={removeFromCustomPlaylist}
         isOpen={showPicker}
       />
 
@@ -220,20 +247,36 @@ export default function Home() {
         {/* Shayari Input FAB */}
         <AnimatePresence>
           {!showPicker && (
-            <motion.button
-              className={styles.fab}
-              onClick={() => setShowShayariInput(true)}
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0, opacity: 0 }}
-              transition={{ delay: 2, type: 'spring', stiffness: 260, damping: 20 }}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              aria-label="Share a thought"
-              title="Drop a thought"
-            >
-              ✍️
-            </motion.button>
+            <div className={styles.fabContainer}>
+              <motion.button
+                className={styles.fab}
+                onClick={() => setShowSuggestInput(true)}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={{ delay: 2, type: 'spring', stiffness: 260, damping: 20 }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                aria-label="Suggest a song"
+                title="Suggest a song"
+              >
+                🎵
+              </motion.button>
+              <motion.button
+                className={styles.fab}
+                onClick={() => setShowShayariInput(true)}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={{ delay: 2.1, type: 'spring', stiffness: 260, damping: 20 }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                aria-label="Share a thought"
+                title="Drop a thought"
+              >
+                ✍️
+              </motion.button>
+            </div>
           )}
         </AnimatePresence>
       </main>
@@ -243,6 +286,13 @@ export default function Home() {
         isOpen={showShayariInput}
         onClose={() => setShowShayariInput(false)}
         onSubmit={handleShayariSubmit}
+      />
+
+      {/* Suggest Song Input Modal */}
+      <SuggestSongInput
+        isOpen={showSuggestInput}
+        onClose={() => setShowSuggestInput(false)}
+        onSubmit={handleSuggestSubmit}
       />
 
       {/* Music Player Bar */}
