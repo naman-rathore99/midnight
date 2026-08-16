@@ -303,3 +303,56 @@
     grid-template-columns: 1fr;
   }
 }
+
+.footer {
+  text-align: center;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 140, 0, 0.2);
+}
+
+.footer p {
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 1.5rem;
+}
+
+.footerLinks {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.kofiBtn, .githubBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.8rem 1.5rem;
+  border-radius: 999px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.kofiBtn {
+  background: #FF5E5B;
+  color: #FFF;
+}
+
+.kofiBtn:hover {
+  background: #FF4441;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255, 94, 91, 0.4);
+}
+
+.githubBtn {
+  background: rgba(255,255,255,0.1);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.githubBtn:hover {
+  background: rgba(255,255,255,0.2);
+  transform: translateY(-2px);
+}
+

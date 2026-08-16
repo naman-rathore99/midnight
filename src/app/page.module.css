@@ -128,3 +128,39 @@
     bottom: calc(var(--player-height-mobile, 130px) + 20px);
   }
 }
+
+.topBarRight {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.topKofiBtn, .topGithubBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.topKofiBtn {
+  font-size: 1.2rem;
+}
+
+.topKofiBtn:hover {
+  background: #FF5E5B;
+  border-color: #FF5E5B;
+  transform: scale(1.1);
+}
+
+.topGithubBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+

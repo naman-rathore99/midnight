@@ -104,6 +104,12 @@ export async function POST(request) {
         return NextResponse.json({ ok: true });
       }
 
+      // Public Commands
+      if (text.startsWith("/coffee") || text.startsWith("/donate")) {
+        await sendMessage(chatId, "☕ Love Midnight Radio?\n\nYou can support the project and help keep the servers running on Ko-fi!\n\n👉 [Support on Ko-fi here](https://ko-fi.com/cc4cc5bb-33f1-4ac6-a7e2-e180ae640a95)");
+        return NextResponse.json({ ok: true });
+      }
+
       // If a normal user sends a link directly to the bot (Bonus Feature)
       const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
       const match = text.match(regExp);
