@@ -28,79 +28,69 @@ const THEMES = [
 ];
 
 export default function Home() {
-  // -- Player state --
   const {
-    currentTrack,
+    currentPlaylist,
     isPlaying,
     progress,
     duration,
     currentTime,
-    mainPlaylist,
-    customPlaylist,
-    activePlaylistType,
-    addToCustomPlaylist,
-    removeFromCustomPlaylist,
-    pickTrack,
+    trackTitle,
+    pickPlaylist,
     togglePlay,
     skip,
     previous,
     setPlayerInstance,
   } = useYouTubePlayer();
 
-  // -- Shayari state --
   const { currentShayari, isVisible, loading, likeShayari, triggerRotation } = useShayari();
-
-  // -- Presence state --
   usePresence();
 
-  // -- UI state --
   const [showPicker, setShowPicker] = useState(true);
   const [showShayariInput, setShowShayariInput] = useState(false);
   const [showSuggestInput, setShowSuggestInput] = useState(false);
   const [likedIds, setLikedIds] = useState(new Set());
   const [themeIndex, setThemeIndex] = useState(0);
 
-  // Load liked IDs from localStorage
   useEffect(() => {
     try {
       const saved = localStorage.getItem('midnight-radio-liked');
       if (saved) {
         setLikedIds(new Set(JSON.parse(saved)));
       }
-    } catch (e) {
-      // ignore
+    } catch (e) {}
+  }, []);
+
+  const handlePickPlaylist = useCallback(
+    (playlist) => {
+      pickPlaylist(playlist);
+      setShowPicker(false);
+      setTimeout(() => triggerRotation(), 1500);
+    },
+    [pickPlaylist, triggerRotation]
+  );
+
+  const handleTrackEnd = useCallback(() => {
+    // The playlist will auto-advance, but we can trigger a new shayari
+    triggerRotation();
+  }, [triggerRotation]);
+
+  const handleStateChange = useCallback((event) => {
+    // YT.PlayerState.PLAYING = 1
+    if (event.data === 1 && event.target) {
+      // Could get track title here if we want
     }
   }, []);
 
-  const handlePickSong = useCallback(
-    (index, type) => {
-      pickTrack(index, type);
-      setShowPicker(false);
-      // Show shayari when first song plays
-      setTimeout(() => triggerRotation(), 1500);
-    },
-    [pickTrack, triggerRotation]
-  );
-
-  // Handle track end → play random + show shayari
-  const handleTrackEnd = useCallback(() => {
-    skip();
-    triggerRotation();
-  }, [skip, triggerRotation]);
-
-  // Handle skip → also show shayari
   const handleSkip = useCallback(() => {
     skip();
     triggerRotation();
   }, [skip, triggerRotation]);
 
-  // Handle previous
   const handlePrevious = useCallback(() => {
     previous();
     triggerRotation();
   }, [previous, triggerRotation]);
 
-  // Handle YouTube player ready
   const handlePlayerReady = useCallback(
     (playerInstance) => {
       setPlayerInstance(playerInstance);
@@ -108,29 +98,22 @@ export default function Home() {
     [setPlayerInstance]
   );
 
-  // Handle like
   const handleLike = useCallback(
     (id) => {
       likeShayari(id);
       setLikedIds((prev) => {
         const next = new Set(prev);
-        if (next.has(id)) {
-          next.delete(id);
-        } else {
-          next.add(id);
-        }
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
         try {
           localStorage.setItem('midnight-radio-liked', JSON.stringify([...next]));
-        } catch (e) {
-          // ignore
-        }
+        } catch (e) {}
         return next;
       });
     },
     [likeShayari]
   );
 
-  // Handle shayari submit
   const handleShayariSubmit = useCallback(async ({ text, author }) => {
     try {
       await fetch('/api/shayari', {
@@ -139,12 +122,9 @@ export default function Home() {
         body: JSON.stringify({ text, author: author || 'Unknown' }),
       });
       setShowShayariInput(false);
-    } catch (e) {
-      console.error('Failed to submit shayari:', e);
-    }
+    } catch (e) {}
   }, []);
 
-  // Handle song suggestion submit
   const handleSuggestSubmit = useCallback(async ({ link, author }) => {
     try {
       await fetch('/api/suggest', {
@@ -153,10 +133,7 @@ export default function Home() {
         body: JSON.stringify({ link, author }),
       });
       setShowSuggestInput(false);
-      // Optional: show a toast notification here
-    } catch (e) {
-      console.error('Failed to submit song suggestion:', e);
-    }
+    } catch (e) {}
   }, []);
 
   const cycleTheme = () => {
@@ -165,35 +142,24 @@ export default function Home() {
 
   return (
     <>
-      {/* V2 Mind-Blowing Infinite Parallax Backgrounds */}
       <CinematicBackground theme={THEMES[themeIndex]} />
-
-      {/* Star Field — ambient particles */}
       <StarField />
 
-      {/* Hidden YouTube Player */}
-      {currentTrack && (
+      {currentPlaylist && (
         <YouTubeEngine
-          videoId={currentTrack.id}
+          playlistId={currentPlaylist.playlist_id}
           onReady={handlePlayerReady}
           onEnd={handleTrackEnd}
-          onStateChange={() => {}}
+          onStateChange={handleStateChange}
         />
       )}
 
-      {/* Song Picker Modal — shown on first visit */}
       <SongPicker
-        mainPlaylist={mainPlaylist}
-        customPlaylist={customPlaylist}
-        onPickSong={handlePickSong}
-        onAddCustom={addToCustomPlaylist}
-        onRemoveCustom={removeFromCustomPlaylist}
+        onPickPlaylist={handlePickPlaylist}
         isOpen={showPicker}
       />
 
-      {/* Main Content Area */}
       <main className={styles.main}>
-        {/* Shayari Display (Left-aligned typography) */}
         <ShayariDisplay
           shayari={currentShayari}
           onLike={handleLike}
@@ -201,7 +167,6 @@ export default function Home() {
           isVisible={isVisible && !showPicker}
         />
         
-        {/* Lyrics or Track Info (Right-aligned) */}
         <AnimatePresence>
           {!showPicker && (
             <motion.div
@@ -211,15 +176,14 @@ export default function Home() {
               transition={{ duration: 1 }}
             >
               <LyricsDisplay 
-                lyrics={currentTrack?.lyrics} 
+                lyrics={null} 
                 currentTime={currentTime} 
-                track={currentTrack}
+                track={currentPlaylist}
               />
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Brand watermark & Scene Switcher */}
         <AnimatePresence>
           {!showPicker && (
             <motion.div
@@ -229,13 +193,13 @@ export default function Home() {
               transition={{ delay: 0.5, duration: 1 }}
             >
               <div className={styles.watermark}>
-                <span className={styles.watermarkIcon}>🌙</span>
+                <span className={styles.watermarkIcon}>??</span>
                 <span className={styles.watermarkText}>Midnight Radio</span>
               </div>
               
               <div className={styles.topBarRight}>
                 <a href="https://ko-fi.com/cc4cc5bb-33f1-4ac6-a7e2-e180ae640a95" target="_blank" rel="noopener noreferrer" className={styles.topKofiBtn} title="Support on Ko-fi">
-                  ☕
+                  ?
                 </a>
                 <a href="https://github.com/naman-rathore99/midnight" target="_blank" rel="noopener noreferrer" className={styles.topGithubBtn} title="Contribute on GitHub">
                   <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
@@ -254,7 +218,6 @@ export default function Home() {
           )}
         </AnimatePresence>
 
-        {/* Shayari Input FAB */}
         <AnimatePresence>
           {!showPicker && (
             <div className={styles.fabContainer}>
@@ -267,10 +230,10 @@ export default function Home() {
                 transition={{ delay: 2, type: 'spring', stiffness: 260, damping: 20 }}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                aria-label="Suggest a song"
-                title="Suggest a song"
+                aria-label="Suggest a playlist"
+                title="Suggest a playlist"
               >
-                🎵
+                ??
               </motion.button>
               <motion.button
                 className={styles.fab}
@@ -284,30 +247,27 @@ export default function Home() {
                 aria-label="Share a thought"
                 title="Drop a thought"
               >
-                ✍️
+                ??
               </motion.button>
             </div>
           )}
         </AnimatePresence>
       </main>
 
-      {/* Shayari Input Modal */}
       <ShayariInput
         isOpen={showShayariInput}
         onClose={() => setShowShayariInput(false)}
         onSubmit={handleShayariSubmit}
       />
 
-      {/* Suggest Song Input Modal */}
       <SuggestSongInput
         isOpen={showSuggestInput}
         onClose={() => setShowSuggestInput(false)}
         onSubmit={handleSuggestSubmit}
       />
 
-      {/* Music Player Bar */}
       <MusicPlayer
-        currentTrack={currentTrack}
+        currentTrack={currentPlaylist}
         isPlaying={isPlaying}
         progress={progress}
         currentTime={currentTime}
@@ -319,3 +279,4 @@ export default function Home() {
     </>
   );
 }
+

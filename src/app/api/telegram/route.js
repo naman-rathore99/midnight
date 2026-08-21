@@ -42,9 +42,22 @@ export async function POST(request) {
 
       if (data.startsWith("accept_")) {
         const id = data.replace("accept_", "");
-        // In a real app, you might move this to a 'playlist' table. 
-        // Here we just mark it as accepted by updating a hypothetical status column, 
-        // or just acknowledging it to the admin.
+        
+        if (supabase) {
+          // Fetch suggestion
+          const { data: suggestion } = await supabase.from("song_suggestions").select("*").eq("id", id).single();
+          
+          if (suggestion) {
+            // Insert into accepted_playlists
+            await supabase.from("accepted_playlists").insert({
+              playlist_id: suggestion.playlist_id,
+              title: "Midnight Radio Playlist " + Math.floor(Math.random() * 1000), // Can be updated by admin later
+              suggested_by: suggestion.suggested_by
+            });
+            // Optional: delete from suggestions
+            // await supabase.from("song_suggestions").delete().eq("id", id);
+          }
+        }
         
         await editMessageText(chatId, messageId, callback.message.text + "\n\n✅ *ACCEPTED*");
       } 
@@ -110,24 +123,18 @@ export async function POST(request) {
         return NextResponse.json({ ok: true });
       }
 
-      // If a normal user sends a link directly to the bot (Bonus Feature)
-      if (text.includes('list=')) {
-        await sendMessage(chatId, "Playlists are not supported. Please submit a single song link.");
-        return NextResponse.json({ ok: true });
-      }
-
-      const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
-      const match = text.match(regExp);
+      // If a normal user sends a link directly to the bot
+      const match = text.match(/[?&]list=([^#&?]+)/);
       
-      if (match && match[2].length === 11) {
-        const videoId = match[2];
+      if (match) {
+        const playlistId = match[1];
         const author = update.message.from.first_name || "Telegram User";
 
         if (supabase) {
           const { data: existing } = await supabase
             .from("song_suggestions")
             .select("id, request_count")
-            .eq("youtube_id", videoId)
+            .eq("playlist_id", playlistId)
             .single();
 
           if (existing) {
@@ -139,19 +146,16 @@ export async function POST(request) {
             await supabase
               .from("song_suggestions")
               .insert({
-                youtube_id: videoId,
+                playlist_id: playlistId,
                 original_link: text,
                 suggested_by: author,
                 request_count: 1,
               });
           }
-          await sendMessage(chatId, "✅ Awesome! Your song has been added to the Midnight Radio suggestions.");
-          
-          // Optionally notify admin here as well
+          await sendMessage(chatId, "✅ Awesome! Your playlist has been added to the Midnight Radio suggestions.");
         }
       } else {
-        // Not a command, not a youtube link
-        await sendMessage(chatId, "Hello! Send me a standard YouTube link or Shorts link to suggest a song for Midnight Radio.");
+        await sendMessage(chatId, "Hello! Send me a YouTube Playlist link (containing list=) to suggest it for Midnight Radio.");
       }
     }
 

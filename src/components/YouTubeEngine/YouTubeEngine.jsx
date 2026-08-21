@@ -4,7 +4,7 @@ import React from 'react';
 import YouTube from 'react-youtube';
 import styles from './YouTubeEngine.module.css';
 
-export default function YouTubeEngine({ videoId, onReady, onEnd, onStateChange }) {
+export default function YouTubeEngine({ playlistId, onReady, onEnd, onStateChange }) {
   const opts = {
     height: '0',
     width: '0',
@@ -15,20 +15,19 @@ export default function YouTubeEngine({ videoId, onReady, onEnd, onStateChange }
       fs: 0,
       modestbranding: 1,
       rel: 0,
+      ...(playlistId && { listType: 'playlist', list: playlistId })
     },
   };
 
   return (
     <div className={styles.hiddenContainer}>
-      {videoId && (
-        <YouTube
-          videoId={videoId}
-          opts={opts}
-          onReady={(event) => onReady && onReady(event.target)}
-          onEnd={onEnd}
-          onStateChange={onStateChange}
-        />
-      )}
+      <YouTube
+        opts={opts}
+        onReady={(event) => onReady && onReady(event.target)}
+        onEnd={onEnd}
+        onStateChange={onStateChange}
+      />
     </div>
   );
 }
+

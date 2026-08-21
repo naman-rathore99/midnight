@@ -16,16 +16,10 @@ export default function SuggestSongInput({ isOpen, onClose, onSubmit }) {
     e.preventDefault();
     if (!link.trim()) return;
 
-    // Improved validation for youtube links
-    if (link.includes('list=')) {
-      setError('Playlists are not supported. Please submit a single song link.');
-      return;
-    }
-
-    const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
-    const match = link.match(regExp);
-    if (!match || match[2].length !== 11) {
-      setError('Invalid link. Please use a standard YouTube video or Shorts link.');
+    // Improved validation for playlists
+    const listMatch = link.match(/[?&]list=([^#&?]+)/);
+    if (!listMatch) {
+      setError('Please provide a valid YouTube Playlist link (containing list=).');
       return;
     }
 
@@ -49,7 +43,7 @@ export default function SuggestSongInput({ isOpen, onClose, onSubmit }) {
         >
           <div className={styles.header}>
             <span className={styles.icon}>🎵</span>
-            <h2>Suggest a Song</h2>
+            <h2>Suggest a Playlist</h2>
             <button className={styles.closeBtn} onClick={onClose}>×</button>
           </div>
           

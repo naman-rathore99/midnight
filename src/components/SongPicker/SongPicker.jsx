@@ -1,25 +1,51 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import styles from './SongPicker.module.css';
 
 export default function SongPicker({ 
-  mainPlaylist = [], 
-  customPlaylist = [], 
-  onPickSong, 
-  onAddCustom,
-  onRemoveCustom,
+  onPickPlaylist, 
   isOpen = true 
 }) {
-  const [activeTab, setActiveTab] = useState('main'); // 'main' or 'custom'
+  const [playlists, setPlaylists] = useState([]);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(false);
 
-  const currentList = activeTab === 'main' ? mainPlaylist : customPlaylist;
+  const fetchPlaylists = useCallback(async (searchQuery, pageNum) => {
+    setLoading(true);
+    try {
+      const res = await fetch(/api/playlists?search= + encodeURIComponent(searchQuery) + &page= + pageNum);
+      const { data, count } = await res.json();
+      setPlaylists(data || []);
+      setTotalCount(count || 0);
+    } catch (err) {
+      console.error('Failed to fetch playlists:', err);
+    }
+    setLoading(false);
+  }, []);
 
-  const handleShuffle = () => {
-    if (currentList.length === 0) return;
-    const randomIndex = Math.floor(Math.random() * currentList.length);
-    onPickSong(randomIndex, activeTab);
+  useEffect(() => {
+    fetchPlaylists(search, page);
+  }, [search, page, fetchPlaylists]);
+
+  const handleLike = async (e, id) => {
+    e.stopPropagation();
+    // Optimistic update
+    setPlaylists(prev => prev.map(p => 
+      p.id === id ? { ...p, like_count: (p.like_count || 0) + 1 } : p
+    ));
+    try {
+      await fetch('/api/playlists/like', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const containerVariants = {
@@ -40,6 +66,8 @@ export default function SongPicker({
     }
   };
 
+  const totalPages = Math.ceil(totalCount / 12);
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -50,7 +78,6 @@ export default function SongPicker({
           animate="visible"
           exit="exit"
         >
-          {/* Blurred Indian Background */}
           <div className={styles.bgImage}></div>
           <div className={styles.bgOverlay}></div>
 
@@ -59,57 +86,39 @@ export default function SongPicker({
               
               <motion.div className={styles.header} variants={itemVariants}>
                 <h1 className={styles.title}>Midnight Radio</h1>
-                <p className={styles.subtitle}>Pick your vibe...</p>
+                <p className={styles.subtitle}>Pick a Playlist...</p>
                 
-                <div className={styles.tabs}>
-                  <button 
-                    className={`${styles.tabBtn} ${activeTab === 'main' ? styles.activeTab : ''}`}
-                    onClick={() => setActiveTab('main')}
-                  >
-                    Main Radio
-                  </button>
-                  <button 
-                    className={`${styles.tabBtn} ${activeTab === 'custom' ? styles.activeTab : ''}`}
-                    onClick={() => setActiveTab('custom')}
-                  >
-                    My Playlist
-                  </button>
+                <div className={styles.searchContainer}>
+                  <input 
+                    type="text" 
+                    placeholder="Search playlists..." 
+                    value={search}
+                    onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                    className={styles.searchInput}
+                  />
                 </div>
-
-                <motion.button 
-                  className={styles.shuffleBtn}
-                  onClick={handleShuffle}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  disabled={currentList.length === 0}
-                >
-                  ✨ Shuffle & Play
-                </motion.button>
               </motion.div>
 
-              {currentList.length === 0 && activeTab === 'custom' && (
+              {playlists.length === 0 && !loading && (
                 <motion.div className={styles.emptyState} variants={itemVariants}>
-                  <p>Your playlist is empty.</p>
-                  <p>Add songs from the Main Radio to build your vibe!</p>
+                  <p>No playlists found.</p>
                 </motion.div>
               )}
 
               <motion.div className={styles.grid}>
-                {currentList.map((song, index) => (
+                {playlists.map((playlist) => (
                   <motion.div
-                    key={song.id || index}
+                    key={playlist.id}
                     className={styles.card}
                     variants={itemVariants}
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
+                    onClick={() => onPickPlaylist(playlist)}
                   >
-                    <div className={styles.thumbnailWrapper} onClick={() => onPickSong(index, activeTab)}>
-                      <img 
-                        src={`https://img.youtube.com/vi/${song.id}/mqdefault.jpg`} 
-                        alt={song.title}
-                        className={styles.thumbnail}
-                        loading="lazy"
-                      />
+                    <div className={styles.thumbnailWrapper}>
+                      <div className={styles.playlistIcon}>
+                        ?? Playlist
+                      </div>
                       <div className={styles.playOverlay}>
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="white">
                           <path d="M8 5v14l11-7z" />
@@ -117,45 +126,44 @@ export default function SongPicker({
                       </div>
                     </div>
                     <div className={styles.cardBody}>
-                      <h3 className={styles.songTitle} onClick={() => onPickSong(index, activeTab)}>{song.title}</h3>
-                      <p className={styles.artistName}>{song.artist}</p>
+                      <h3 className={styles.songTitle}>{playlist.title}</h3>
+                      <p className={styles.artistName}>By: {playlist.suggested_by || 'Anonymous'}</p>
                       
                       <div className={styles.cardFooter}>
-                        {activeTab === 'main' ? (
-                          <button 
-                            className={styles.addBtn} 
-                            onClick={(e) => { e.stopPropagation(); onAddCustom(song); }}
-                            title="Add to My Playlist"
-                          >
-                            + Add
-                          </button>
-                        ) : (
-                          <button 
-                            className={styles.removeBtn} 
-                            onClick={(e) => { e.stopPropagation(); onRemoveCustom(song.id); }}
-                            title="Remove from My Playlist"
-                          >
-                            - Remove
-                          </button>
-                        )}
-                        
-                        {song.vibe && (
-                          <div className={styles.vibeWrapper}>
-                            <span className={styles.vibeDot} />
-                            <span className={styles.vibeText}>{song.vibe}</span>
-                          </div>
-                        )}
+                        <button className={styles.likeBtn} onClick={(e) => handleLike(e, playlist.id)}>
+                          ?? {playlist.like_count || 0}
+                        </button>
                       </div>
                     </div>
                   </motion.div>
                 ))}
               </motion.div>
 
+              {totalPages > 1 && (
+                <motion.div className={styles.pagination} variants={itemVariants}>
+                  <button 
+                    disabled={page === 1} 
+                    onClick={() => setPage(p => p - 1)}
+                    className={styles.pageBtn}
+                  >
+                    Previous
+                  </button>
+                  <span className={styles.pageText}>Page {page} of {totalPages}</span>
+                  <button 
+                    disabled={page === totalPages} 
+                    onClick={() => setPage(p => p + 1)}
+                    className={styles.pageBtn}
+                  >
+                    Next
+                  </button>
+                </motion.div>
+              )}
+
               <motion.div className={styles.footer} variants={itemVariants}>
                 <p>Love Midnight Radio? Support the project!</p>
                 <div className={styles.footerLinks}>
                   <a href="https://ko-fi.com/cc4cc5bb-33f1-4ac6-a7e2-e180ae640a95" target="_blank" rel="noopener noreferrer" className={styles.kofiBtn}>
-                    ☕ Support on Ko-fi
+                    ? Support on Ko-fi
                   </a>
                   <a href="https://github.com/naman-rathore99/midnight" target="_blank" rel="noopener noreferrer" className={styles.githubBtn}>
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
@@ -172,3 +180,4 @@ export default function SongPicker({
     </AnimatePresence>
   );
 }
+

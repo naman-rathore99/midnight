@@ -356,3 +356,74 @@
   transform: translateY(-2px);
 }
 
+
+.searchContainer {
+  margin: 1rem 0;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.8rem 1.2rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 140, 0, 0.3);
+  background: rgba(0, 0, 0, 0.4);
+  color: white;
+  font-size: 1rem;
+}
+
+.playlistIcon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  color: white;
+  background: rgba(255, 140, 0, 0.5);
+  padding: 1rem;
+  border-radius: 50%;
+}
+
+.thumbnailWrapper {
+  background: #222;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.pageBtn {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  background: rgba(255, 140, 0, 0.8);
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.pageBtn:disabled {
+  background: rgba(255, 255, 255, 0.1);
+  cursor: not-allowed;
+}
+
+.pageText {
+  color: white;
+}
+
+.likeBtn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: white;
+  padding: 0.3rem 0.8rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.likeBtn:hover {
+  background: rgba(255, 94, 91, 0.8);
+}
+

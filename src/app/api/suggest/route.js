@@ -1,36 +1,34 @@
 import { supabase } from "@/lib/supabase";
 import { NextResponse } from "next/server";
 
-function extractYouTubeId(url) {
-  if (url.includes('list=')) return null; // Reject playlists
-  const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
-  const match = url.match(regExp);
-  return (match && match[2].length === 11) ? match[2] : null;
+function extractPlaylistId(url) {
+  const match = url.match(/[?&]list=([^#&?]+)/);
+  return match ? match[1] : null;
 }
 
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { link, author } = body;
+    const { link, author, title } = body;
 
     if (!link || typeof link !== "string" || link.trim().length === 0) {
       return NextResponse.json({ error: "YouTube link is required" }, { status: 400 });
     }
 
-    const videoId = extractYouTubeId(link.trim());
+    const playlistId = extractPlaylistId(link.trim());
     
-    if (!videoId) {
-      return NextResponse.json({ error: "Invalid YouTube link" }, { status: 400 });
+    if (!playlistId) {
+      return NextResponse.json({ error: "Invalid link. Please provide a valid YouTube Playlist link (containing list=)." }, { status: 400 });
     }
 
     const suggestedBy = author?.trim() || "Anonymous";
+    const playlistTitle = title?.trim() || "Unknown Playlist";
 
     let finalData = null;
 
     if (!supabase) {
-      // Mock response if Supabase isn't configured
       return NextResponse.json({
-        data: { youtube_id: videoId, original_link: link, request_count: 1 },
+        data: { playlist_id: playlistId, original_link: link, request_count: 1 },
         message: "Saved locally (Supabase not configured)",
       });
     }
@@ -39,7 +37,7 @@ export async function POST(request) {
     const { data: existing } = await supabase
       .from("song_suggestions")
       .select("id, request_count")
-      .eq("youtube_id", videoId)
+      .eq("playlist_id", playlistId)
       .single();
 
     if (existing) {
@@ -58,7 +56,7 @@ export async function POST(request) {
       const { data, error } = await supabase
         .from("song_suggestions")
         .insert({
-          youtube_id: videoId,
+          playlist_id: playlistId,
           original_link: link.trim(),
           suggested_by: suggestedBy,
           request_count: 1,
