@@ -111,7 +111,12 @@ export async function POST(request) {
       }
 
       // If a normal user sends a link directly to the bot (Bonus Feature)
-      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+      if (text.includes('list=')) {
+        await sendMessage(chatId, "Playlists are not supported. Please submit a single song link.");
+        return NextResponse.json({ ok: true });
+      }
+
+      const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
       const match = text.match(regExp);
       
       if (match && match[2].length === 11) {
@@ -146,7 +151,7 @@ export async function POST(request) {
         }
       } else {
         // Not a command, not a youtube link
-        await sendMessage(chatId, "Hello! Send me a YouTube link to suggest a song for Midnight Radio.");
+        await sendMessage(chatId, "Hello! Send me a standard YouTube link or Shorts link to suggest a song for Midnight Radio.");
       }
     }
 

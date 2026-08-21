@@ -16,11 +16,16 @@ export default function SuggestSongInput({ isOpen, onClose, onSubmit }) {
     e.preventDefault();
     if (!link.trim()) return;
 
-    // Simple validation for youtube link
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    // Improved validation for youtube links
+    if (link.includes('list=')) {
+      setError('Playlists are not supported. Please submit a single song link.');
+      return;
+    }
+
+    const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
     const match = link.match(regExp);
     if (!match || match[2].length !== 11) {
-      setError('Please enter a valid YouTube link.');
+      setError('Invalid link. Please use a standard YouTube video or Shorts link.');
       return;
     }
 
