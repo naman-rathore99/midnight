@@ -127,7 +127,7 @@ export default function SongPicker({
                   >
                     <div className={styles.thumbnailWrapper}>
                       <div className={styles.playlistIcon}>
-                        ?? Playlist
+                        💯 Playlist
                       </div>
                       <div className={styles.playOverlay}>
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="white">
@@ -141,7 +141,7 @@ export default function SongPicker({
                       
                       <div className={styles.cardFooter}>
                         <button className={styles.likeBtn} onClick={(e) => handleLike(e, playlist.id)}>
-                          ?? {playlist.like_count || 0}
+                          ⟤️ {playlist.like_count || 0}
                         </button>
                       </div>
                     </div>
@@ -173,7 +173,7 @@ export default function SongPicker({
                 <p>Love Midnight Radio? Support the project!</p>
                 <div className={styles.footerLinks}>
                   <a href="https://ko-fi.com/cc4cc5bb-33f1-4ac6-a7e2-e180ae640a95" target="_blank" rel="noopener noreferrer" className={styles.kofiBtn}>
-                    ? Support on Ko-fi
+                    ☕ Support on Ko-fi
                   </a>
                   <a href="https://github.com/naman-rathore99/midnight" target="_blank" rel="noopener noreferrer" className={styles.githubBtn}>
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">

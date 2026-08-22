@@ -190,13 +190,13 @@ export default function Home() {
               transition={{ delay: 0.5, duration: 1 }}
             >
               <div className={styles.watermark}>
-                <span className={styles.watermarkIcon}>??</span>
+                <span className={styles.watermarkIcon}>📻</span>
                 <span className={styles.watermarkText}>Midnight Radio</span>
               </div>
               
               <div className={styles.topBarRight}>
                 <a href="https://ko-fi.com/cc4cc5bb-33f1-4ac6-a7e2-e180ae640a95" target="_blank" rel="noopener noreferrer" className={styles.topKofiBtn} title="Support on Ko-fi">
-                  ?
+                  ☕
                 </a>
                 <a href="https://github.com/naman-rathore99/midnight" target="_blank" rel="noopener noreferrer" className={styles.topGithubBtn} title="Contribute on GitHub">
                   <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
@@ -230,7 +230,7 @@ export default function Home() {
                 aria-label="Suggest a playlist"
                 title="Suggest a playlist"
               >
-                ??
+                🎁
               </motion.button>
               <motion.button
                 className={styles.fab}
@@ -244,7 +244,7 @@ export default function Home() {
                 aria-label="Share a thought"
                 title="Drop a thought"
               >
-                ??
+                🔧
               </motion.button>
             </div>
           )}
