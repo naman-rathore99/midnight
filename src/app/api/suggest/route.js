@@ -53,7 +53,7 @@ export async function POST(request) {
       finalData = data;
     } else {
       // Insert new suggestion
-      const { data, error } = await supabase
+      let insertResult = await supabase
         .from("song_suggestions")
         .insert({
           playlist_id: playlistId,
@@ -64,8 +64,22 @@ export async function POST(request) {
         .select()
         .single();
         
-      if (error) throw error;
-      finalData = data;
+      // Fallback if the user didn't rename the column in Supabase
+      if (insertResult.error && insertResult.error.message.includes('playlist_id')) {
+        insertResult = await supabase
+          .from("song_suggestions")
+          .insert({
+            youtube_id: playlistId, // fallback to old column name
+            original_link: link.trim(),
+            suggested_by: suggestedBy,
+            request_count: 1,
+          })
+          .select()
+          .single();
+      }
+
+      if (insertResult.error) throw insertResult.error;
+      finalData = insertResult.data;
     }
 
     // Send Webhook Notification
@@ -131,6 +145,6 @@ export async function POST(request) {
     return NextResponse.json({ data: finalData, message: "Suggestion submitted!" });
   } catch (err) {
     console.error("Error submitting suggestion:", err);
-    return NextResponse.json({ error: "Failed to submit suggestion" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to submit suggestion", details: err?.message || String(err) }, { status: 500 });
   }
 }

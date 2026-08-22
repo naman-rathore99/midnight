@@ -25,9 +25,25 @@ export default function SuggestSongInput({ isOpen, onClose, onSubmit }) {
 
     setError('');
     setIsSubmitting(true);
-    await onSubmit({ link, author });
+    try {
+      const res = await fetch('/api/suggest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ link, author }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || data.details || 'Failed to submit suggestion.');
+        setIsSubmitting(false);
+        return;
+      }
+      await onSubmit({ link, author });
+      setLink('');
+      setAuthor('');
+    } catch (err) {
+      setError('Network error.');
+    }
     setIsSubmitting(false);
-    setLink('');
     setAuthor('');
   };
 

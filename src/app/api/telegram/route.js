@@ -50,7 +50,7 @@ export async function POST(request) {
           if (suggestion) {
             // Insert into accepted_playlists
             await supabase.from("accepted_playlists").insert({
-              playlist_id: suggestion.playlist_id,
+              playlist_id: suggestion.playlist_id || suggestion.youtube_id,
               title: "Midnight Radio Playlist " + Math.floor(Math.random() * 1000), // Can be updated by admin later
               suggested_by: suggestion.suggested_by
             });
@@ -143,7 +143,7 @@ export async function POST(request) {
               .update({ request_count: existing.request_count + 1 })
               .eq("id", existing.id);
           } else {
-            await supabase
+            const { error: insertError } = await supabase
               .from("song_suggestions")
               .insert({
                 playlist_id: playlistId,
@@ -151,6 +151,17 @@ export async function POST(request) {
                 suggested_by: author,
                 request_count: 1,
               });
+              
+            if (insertError && insertError.message.includes('playlist_id')) {
+              await supabase
+                .from("song_suggestions")
+                .insert({
+                  youtube_id: playlistId,
+                  original_link: text,
+                  suggested_by: author,
+                  request_count: 1,
+                });
+            }
           }
           await sendMessage(chatId, "✅ Awesome! Your playlist has been added to the Midnight Radio suggestions.");
         }

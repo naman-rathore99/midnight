@@ -125,15 +125,8 @@ export default function Home() {
     } catch (e) {}
   }, []);
 
-  const handleSuggestSubmit = useCallback(async ({ link, author }) => {
-    try {
-      await fetch('/api/suggest', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ link, author }),
-      });
-      setShowSuggestInput(false);
-    } catch (e) {}
+  const handleSuggestSubmit = useCallback(async () => {
+    setShowSuggestInput(false);
   }, []);
 
   const cycleTheme = () => {
