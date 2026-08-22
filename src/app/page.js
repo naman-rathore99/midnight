@@ -50,6 +50,7 @@ export default function Home() {
   const [showSuggestInput, setShowSuggestInput] = useState(false);
   const [likedIds, setLikedIds] = useState(new Set());
   const [themeIndex, setThemeIndex] = useState(0);
+  const [currentVideoData, setCurrentVideoData] = useState(null);
 
   useEffect(() => {
     try {
@@ -81,7 +82,14 @@ export default function Home() {
   const handleStateChange = useCallback((event) => {
     // YT.PlayerState.PLAYING = 1
     if (event.data === 1 && event.target) {
-      // Could get track title here if we want
+      const data = event.target.getVideoData();
+      if (data) {
+        setCurrentVideoData({
+          title: data.title,
+          author: data.author,
+          videoId: data.video_id
+        });
+      }
     }
   }, []);
 
@@ -264,7 +272,16 @@ export default function Home() {
       />
 
       <MusicPlayer
-        currentTrack={currentPlaylist}
+        currentTrack={
+          currentPlaylist
+            ? {
+                ...currentPlaylist,
+                title: currentVideoData?.title || currentPlaylist.title,
+                artist: currentVideoData?.author || currentPlaylist.suggested_by,
+                youtubeId: currentVideoData?.videoId || null,
+              }
+            : null
+        }
         isPlaying={isPlaying}
         progress={progress}
         currentTime={currentTime}

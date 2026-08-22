@@ -28,11 +28,15 @@ export default function MusicPlayer({
         <div className={styles.content}>
           <div className={styles.trackInfoWrapper}>
             <div className={`${styles.vinyl} ${isPlaying ? styles.spinning : ''}`}>
-              <img
-                src={`https://img.youtube.com/vi/${currentTrack.youtubeId}/hqdefault.jpg`}
-                alt="cover"
-                className={styles.cover}
-              />
+              {currentTrack.youtubeId ? (
+                <img
+                  src={`https://img.youtube.com/vi/${currentTrack.youtubeId}/hqdefault.jpg`}
+                  alt="cover"
+                  className={styles.cover}
+                />
+              ) : (
+                <div className={styles.cover} style={{ backgroundColor: '#222' }} />
+              )}
               <div className={styles.hole} />
             </div>
             <div className={styles.trackInfo}>
