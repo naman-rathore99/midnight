@@ -17,7 +17,7 @@ export default function SongPicker({
   const fetchPlaylists = useCallback(async (searchQuery, pageNum) => {
     setLoading(true);
     try {
-      const res = await fetch(/api/playlists?search= + encodeURIComponent(searchQuery) + &page= + pageNum);
+      const res = await fetch(`/api/playlists?search=${encodeURIComponent(searchQuery)}&page=${pageNum}`);
       const { data, count } = await res.json();
       setPlaylists(data || []);
       setTotalCount(count || 0);
