@@ -102,6 +102,16 @@ export default function SongPicker({
               {playlists.length === 0 && !loading && (
                 <motion.div className={styles.emptyState} variants={itemVariants}>
                   <p>No playlists found.</p>
+                  <button 
+                    className={styles.pageBtn} 
+                    style={{ marginTop: '1rem' }}
+                    onClick={() => {
+                      // Trigger a custom event to open the suggest modal
+                      window.dispatchEvent(new CustomEvent('open-suggest-modal'));
+                    }}
+                  >
+                    Suggest a Playlist
+                  </button>
                 </motion.div>
               )}
 

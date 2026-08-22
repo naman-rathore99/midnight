@@ -22,12 +22,31 @@ export async function GET(request) {
       query = query.ilike('title', `%${search}%`);
     }
 
-    const { data, count, error } = await query
+    let { data, count, error } = await query
       .order('like_count', { ascending: false })
       .order('created_at', { ascending: false })
       .range(from, to);
 
     if (error) throw error;
+
+    // Auto-seed a default playlist if the database is completely empty
+    if (!search && count === 0 && page === 1) {
+      const defaultPlaylist = {
+        playlist_id: 'PLrQ2C4c2P-7rS2jL86dZ-2yWp3XwWl38s', // Example lofi playlist
+        title: 'Midnight Lofi Radio (Demo)',
+        suggested_by: 'System',
+        like_count: 5
+      };
+      
+      const { error: seedError } = await supabase
+        .from('accepted_playlists')
+        .insert(defaultPlaylist);
+        
+      if (!seedError) {
+        data = [defaultPlaylist];
+        count = 1;
+      }
+    }
 
     return NextResponse.json({ data, count });
   } catch (error) {

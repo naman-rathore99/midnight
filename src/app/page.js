@@ -58,6 +58,10 @@ export default function Home() {
         setLikedIds(new Set(JSON.parse(saved)));
       }
     } catch (e) {}
+
+    const handleOpenSuggest = () => setShowSuggestInput(true);
+    window.addEventListener('open-suggest-modal', handleOpenSuggest);
+    return () => window.removeEventListener('open-suggest-modal', handleOpenSuggest);
   }, []);
 
   const handlePickPlaylist = useCallback(
